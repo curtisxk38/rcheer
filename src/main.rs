@@ -1,12 +1,22 @@
 use std::{env, fs::{self, File}, io::Write};
 
+mod scan;
+mod token;
+
 enum CompileResult {
     Program(String),
     Error
 }
 
 fn compile(program: String) -> CompileResult {
-
+    match scan::scan(&program) {
+        scan::ScanResult::Tokens(tokens) => {
+            println!("{:?}", tokens);
+        }
+        scan::ScanResult::Error(error) => {
+            return CompileResult::Error;
+        }
+    }
     CompileResult::Program(String::new())
 }
 
@@ -27,7 +37,9 @@ fn main() {
                 file.write_all(asm.as_bytes())
                     .expect("Failed to write to output file: {:?}")
             }
-            CompileResult::Error => {}
+            CompileResult::Error => {
+                println!("error");
+            }
         }
     }
 }
