@@ -2,6 +2,8 @@ use std::{env, fs::{self, File}, io::Write};
 
 mod scan;
 mod token;
+mod parse;
+mod ast;
 
 enum CompileResult {
     Program(String),
@@ -11,7 +13,14 @@ enum CompileResult {
 fn compile(program: String) -> CompileResult {
     match scan::scan(&program) {
         scan::ScanResult::Tokens(tokens) => {
-            println!("{:?}", tokens);
+            match parse::parse(&tokens) {
+                parse::ParseResult::AST(ast) => {
+
+                }
+                parse::ParseResult::Error => {
+                    return CompileResult::Error;
+                }
+            }
         }
         scan::ScanResult::Error(error) => {
             return CompileResult::Error;
