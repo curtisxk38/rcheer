@@ -4,6 +4,7 @@ mod scan;
 mod token;
 mod parse;
 mod ast;
+mod codegen;
 
 enum CompileResult {
     Program(String),
@@ -15,7 +16,8 @@ fn compile(program: String) -> CompileResult {
         scan::ScanResult::Tokens(tokens) => {
             match parse::parse(&tokens) {
                 parse::ParseResult::AST(ast) => {
-
+                    let asm = codegen::gen_code(ast);
+                    CompileResult::Program(asm)
                 }
                 parse::ParseResult::Error => {
                     return CompileResult::Error;
@@ -26,7 +28,6 @@ fn compile(program: String) -> CompileResult {
             return CompileResult::Error;
         }
     }
-    CompileResult::Program(String::new())
 }
 
 fn main() {
