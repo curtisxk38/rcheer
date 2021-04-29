@@ -52,11 +52,12 @@ fn visit_binary(node: &Binary, program: &mut String) {
     visit_expr(node.left.as_ref(), program);
     visit_expr(node.right.as_ref(), program);
     let op_instr = match node.operation {
-        BinaryOp::Add => "addq"
+        BinaryOp::Add => "addq",
+        BinaryOp::Minus => "subq"
     };
     program.push_str(
-        format!("popq %rax
-        popq %rdx
+        format!("popq %rdx
+        popq %rax
         {} %rdx, %rax
         pushq %rax", op_instr).as_str()
     )

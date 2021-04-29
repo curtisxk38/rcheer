@@ -7,7 +7,8 @@ pub enum Expr<'t> {
 }
 
 pub enum BinaryOp {
-    Add
+    Add,
+    Minus
 }
 
 pub enum LiteralType {

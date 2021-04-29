@@ -18,7 +18,12 @@ pub fn scan(program: &str) -> ScanResult {
                 match char {
                     '+' => {
                         chars.next();
-                        let token = Token {token_type: TokenType::Plus, lexeme: format!("+")};
+                        let token = Token {token_type: TokenType::Plus, lexeme: String::from("+")};
+                        tokens.push(token);
+                    }
+                    '-' => {
+                        chars.next();
+                        let token = Token {token_type: TokenType::Minus, lexeme: String::from("-")};
                         tokens.push(token);
                     }
                     '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' => {

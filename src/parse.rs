@@ -25,7 +25,7 @@ pub fn parse(tokens: &Vec<Token>) -> ParseResult {
     }
 }
 
-// expression => primary ("+" primary)* ;
+// expression => primary (("+"|"-") primary)* ;
 pub fn expression<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
     let mut expr = primary(tokens)?;
     loop {
@@ -39,6 +39,11 @@ pub fn expression<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>
                         operation = BinaryOp::Add;
                         tokens.next();
                     },
+                    TokenType::Minus => {
+                        op_token = *token;
+                        operation = BinaryOp::Minus;
+                        tokens.next();
+                    }
                     _ => {
                         break;
                     }

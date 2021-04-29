@@ -9,4 +9,5 @@ pub struct Token {
 pub enum TokenType {
     IntLiteral,
     Plus,
+    Minus,
 }
