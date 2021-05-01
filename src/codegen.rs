@@ -66,6 +66,7 @@ fn visit_binary(node: &Binary, program: &mut String) {
 }
 
 fn visit_unary(node: &Unary, program: &mut String) {
+    visit_expr(node.right.as_ref(), program);
     program.push_str(
         format!("
             popq %rax
