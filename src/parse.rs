@@ -1,6 +1,6 @@
-use std::{iter::Peekable, slice::Iter};
+use std::{collections::binary_heap::PeekMut, iter::Peekable, slice::Iter};
 
-use crate::{ast::{Binary, BinaryOp, Expr, Literal, LiteralType}, token::{Token, TokenType}};
+use crate::{ast::{Binary, BinaryOp, Expr, Literal, LiteralType, Unary}, token::{Token, TokenType}};
 
 
 pub enum ParseResult<'t> {
@@ -25,9 +25,9 @@ pub fn parse(tokens: &Vec<Token>) -> ParseResult {
     }
 }
 
-// expression => primary (("+"|"-") primary)* ;
-pub fn expression<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
-    let mut expr = primary(tokens)?;
+// expression => factor (("+"|"-") factor)* ;
+fn expression<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
+    let mut expr = factor(tokens)?;
     loop {
         let op_token;
         let operation;
@@ -38,7 +38,7 @@ pub fn expression<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>
                         op_token = *token;
                         operation = BinaryOp::Add;
                         tokens.next();
-                    },
+                    }
                     TokenType::Minus => {
                         op_token = *token;
                         operation = BinaryOp::Minus;
@@ -53,14 +53,68 @@ pub fn expression<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>
                 break;
             }
         };
-        let right = primary(tokens)?;
+        let right = factor(tokens)?;
         expr = Expr::Binary(Binary {token: op_token, operation, left: Box::new(expr), right: Box::new(right)})
     }
     Ok(expr)
 }
 
+// factor => unary (("*") unary)*
+fn factor<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
+    let mut expr = unary(tokens)?;
+    loop {
+        let op_token;
+        let operation;
+        match tokens.peek() {
+            Some(token) => {
+                match token.token_type {
+                    TokenType::Star => {
+                        op_token = *token;
+                        operation = BinaryOp::Times;
+                        tokens.next();
+                    }
+                    _ => {
+                        break;
+                    }
+                }
+            }
+            None => {
+                break;
+            }
+        };
+        let right = unary(tokens)?;
+        expr = Expr::Binary(Binary {token: op_token, operation, left: Box::new(expr), right: Box::new(right)})
+    }
+    Ok(expr)
+}
+
+// unary -> ( "-" ) unary | primary
+fn unary<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
+    match tokens.peek() {
+        Some(token) => {
+            let op_token;
+            let operation;
+            match token.token_type {
+                TokenType::Minus => {
+                    op_token = *token;
+                    operation = BinaryOp::Times;
+                    tokens.next();
+                    let right = unary(tokens)?;
+                    Ok(Expr::Unary(Unary {token: op_token, operation, right: Box::new(right)}))
+                }
+                _ => {
+                    primary(tokens)
+                }
+            }
+        }
+        None => {
+            Err(ParseError{message: String::from("Reached EOF while parsing")})
+        }
+    }
+}
+
 // primary => NUMBER ;
-pub fn primary<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
+fn primary<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
     match tokens.peek() {
         Some(token) => {
             match token.token_type {

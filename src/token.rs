@@ -10,4 +10,7 @@ pub enum TokenType {
     IntLiteral,
     Plus,
     Minus,
+    Star,
+    LeftParen,
+    RightParen,
 }

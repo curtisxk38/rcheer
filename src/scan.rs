@@ -26,6 +26,21 @@ pub fn scan(program: &str) -> ScanResult {
                         let token = Token {token_type: TokenType::Minus, lexeme: String::from("-")};
                         tokens.push(token);
                     }
+                    '*' => {
+                        chars.next();
+                        let token = Token {token_type: TokenType::Star, lexeme: String::from("*")};
+                        tokens.push(token);
+                    }
+                    '(' => {
+                        chars.next();
+                        let token = Token {token_type: TokenType::LeftParen, lexeme: String::from("(")};
+                        tokens.push(token);
+                    }
+                    ')' => {
+                        chars.next();
+                        let token = Token {token_type: TokenType::RightParen, lexeme: String::from(")")};
+                        tokens.push(token);
+                    }
                     '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' => {
                         let char = char.clone();
                         chars.next();
