@@ -1,4 +1,4 @@
-use crate::ast::{Binary, BinaryOp, Expr, Literal};
+use crate::ast::{Binary, BinaryOp, Expr, Literal, Unary, UnaryOp};
 
 pub fn gen_code(ast: Expr) -> String {
     let mut program = String::new();
@@ -45,6 +45,7 @@ fn visit_expr(node: &Expr, program: &mut String) {
     match node {
         Expr::Binary(binary) => {visit_binary(binary, program)}
         Expr::Literal(literal) => {visit_literal(literal, program)}
+        Expr::Unary(unary) => {visit_unary(unary, program)}
     }
 }
 
@@ -53,7 +54,8 @@ fn visit_binary(node: &Binary, program: &mut String) {
     visit_expr(node.right.as_ref(), program);
     let op_instr = match node.operation {
         BinaryOp::Add => "addq",
-        BinaryOp::Minus => "subq"
+        BinaryOp::Minus => "subq",
+        BinaryOp::Times => "imulq",
     };
     program.push_str(
         format!("popq %rdx
@@ -61,6 +63,21 @@ fn visit_binary(node: &Binary, program: &mut String) {
         {} %rdx, %rax
         pushq %rax", op_instr).as_str()
     )
+}
+
+fn visit_unary(node: &Unary, program: &mut String) {
+    program.push_str(
+        format!("
+            popq %rax
+            {}
+            pushq %rax
+        ",
+        match node.operation {
+            UnaryOp::Minus => "imulq $-1, %rax"
+        }
+        ).as_str()
+    );
+    
 }
 
 fn visit_literal(node: &Literal, program: &mut String) {

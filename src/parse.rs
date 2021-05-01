@@ -1,6 +1,6 @@
 use std::{collections::binary_heap::PeekMut, iter::Peekable, slice::Iter};
 
-use crate::{ast::{Binary, BinaryOp, Expr, Literal, LiteralType, Unary}, token::{Token, TokenType}};
+use crate::{ast::{Binary, BinaryOp, Expr, Literal, LiteralType, Unary, UnaryOp}, token::{Token, TokenType}};
 
 
 pub enum ParseResult<'t> {
@@ -97,7 +97,7 @@ fn unary<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseEr
             match token.token_type {
                 TokenType::Minus => {
                     op_token = *token;
-                    operation = BinaryOp::Times;
+                    operation = UnaryOp::Minus;
                     tokens.next();
                     let right = unary(tokens)?;
                     Ok(Expr::Unary(Unary {token: op_token, operation, right: Box::new(right)}))

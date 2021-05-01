@@ -30,7 +30,7 @@ pub struct Binary<'t> {
 
 pub struct Unary<'t> {
     pub token: &'t Token,
-    pub operation: BinaryOp,
+    pub operation: UnaryOp,
     pub right: Box<Expr<'t>>
 }
 
