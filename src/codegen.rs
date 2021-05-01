@@ -58,7 +58,8 @@ fn visit_binary(node: &Binary, program: &mut String) {
         BinaryOp::Times => "imulq",
     };
     program.push_str(
-        format!("popq %rdx
+        format!("
+        popq %rdx
         popq %rax
         {} %rdx, %rax
         pushq %rax", op_instr).as_str()
@@ -69,9 +70,9 @@ fn visit_unary(node: &Unary, program: &mut String) {
     visit_expr(node.right.as_ref(), program);
     program.push_str(
         format!("
-            popq %rax
-            {}
-            pushq %rax
+        popq %rax
+        {}
+        pushq %rax
         ",
         match node.operation {
             UnaryOp::Minus => "imulq $-1, %rax"
