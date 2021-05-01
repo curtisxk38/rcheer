@@ -46,6 +46,7 @@ fn visit_expr(node: &Expr, program: &mut String) {
         Expr::Binary(binary) => {visit_binary(binary, program)}
         Expr::Literal(literal) => {visit_literal(literal, program)}
         Expr::Unary(unary) => {visit_unary(unary, program)}
+        Expr::Grouping(grouping) => {visit_expr(grouping.expr.as_ref(), program)}
     }
 }
 

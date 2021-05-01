@@ -1,6 +1,6 @@
 use std::{collections::binary_heap::PeekMut, iter::Peekable, slice::Iter};
 
-use crate::{ast::{Binary, BinaryOp, Expr, Literal, LiteralType, Unary, UnaryOp}, token::{Token, TokenType}};
+use crate::{ast::{Binary, BinaryOp, Expr, Grouping, Literal, LiteralType, Unary, UnaryOp}, token::{Token, TokenType}};
 
 
 pub enum ParseResult<'t> {
@@ -17,7 +17,15 @@ pub fn parse(tokens: &Vec<Token>) -> ParseResult {
     let mut tokens = tokens.iter().peekable();
     match expression(&mut tokens) {
         Ok(expr) => {
-            ParseResult::AST(expr)
+            match tokens.peek() {
+                Some(_) => {
+                    // finished parsing, but there's still some tokens left
+                    ParseResult::Error
+                }
+                None => {
+                    ParseResult::AST(expr)
+                }
+            }
         }
         Err(_) => {
             ParseResult::Error
@@ -113,7 +121,7 @@ fn unary<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseEr
     }
 }
 
-// primary => NUMBER ;
+// primary => NUMBER | "(" expression ")";
 fn primary<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
     match tokens.peek() {
         Some(token) => {
@@ -122,14 +130,35 @@ fn primary<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, Parse
                     let token = *token;
                     tokens.next();
                     Ok(Expr::Literal(Literal { token, literal_type: LiteralType::Int}))
-                },
+                }
+                TokenType::LeftParen => {
+                    tokens.next();
+                    let expr = expression(tokens)?;
+                    let node = Expr::Grouping(Grouping {expr: Box::new(expr)});
+                    match tokens.peek() {
+                        Some(token) => {
+                            match token.token_type {
+                                TokenType::RightParen => {
+                                    tokens.next();
+                                    Ok(node)
+                                }
+                                _ => {
+                                    Err(ParseError{message: format!("Expected ), found: {:?}", token)})
+                                }
+                            }
+                        }
+                        None => {
+                            Err(ParseError{message: format!("Reached EOF while parsing, expected )")})
+                        }
+                    }
+                }
                 _ => {
-                    Err(ParseError{message: format!("Expected an int, found: {:?}", token)})
+                    Err(ParseError{message: format!("Expected primary expression, found: {:?}", token)})
                 }
             }
         }
         None => {
-            Err(ParseError{message: String::from("Expected a primary, no tokens left")})
+            Err(ParseError{message: String::from("Reached EOF while parsing")})
         }
     }
 }
