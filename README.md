@@ -1,5 +1,4 @@
 # RCheer
-=====
 A compiler
 
 Compile by running `cargo run filename.ch`
@@ -45,4 +44,9 @@ info frame
 i r $sp
 i r $rax
 x/5x $sp
+```
+
+syscall stuff
+```
+https://stackoverflow.com/questions/12806584/what-is-better-int-0x80-or-syscall-in-32-bit-code-on-linux
 ```
