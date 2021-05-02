@@ -13,4 +13,12 @@ pub enum TokenType {
     Star,
     LeftParen,
     RightParen,
+    Greater,
+    GreaterEqual,
+    Less,
+    LessEqual,
+    Equal,
+    EqualEqual,
+    Bang,
+    BangEqual,
 }

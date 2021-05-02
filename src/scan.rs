@@ -47,6 +47,94 @@ pub fn scan(program: &str) -> ScanResult {
                         let token = match_number(&mut chars, char);
                         tokens.push(token)
                     }
+                    '>' => {
+                        chars.next();
+                        let mut token_type = TokenType::Greater;
+                        let mut lexeme = String::from(">");
+                        match chars.peek() {
+                            Some(char) => {
+                                match char {
+                                    '=' => {
+                                        chars.next();
+                                        token_type = TokenType::GreaterEqual;
+                                        lexeme = String::from(">=");
+                                    }
+                                    _ => {
+
+                                    }
+                                }
+                            }
+                            None => {}
+                        }
+                        let token = Token {token_type, lexeme};
+                        tokens.push(token);
+                    }
+                    '<' => {
+                        chars.next();
+                        let mut token_type = TokenType::Less;
+                        let mut lexeme = String::from("<");
+                        match chars.peek() {
+                            Some(char) => {
+                                match char {
+                                    '=' => {
+                                        chars.next();
+                                        token_type = TokenType::LessEqual;
+                                        lexeme = String::from("<=");
+                                    }
+                                    _ => {
+
+                                    }
+                                }
+                            }
+                            None => {}
+                        }
+                        let token = Token {token_type, lexeme};
+                        tokens.push(token);
+                    }
+                    '=' => {
+                        chars.next();
+                        let mut token_type = TokenType::Equal;
+                        let mut lexeme = String::from("=");
+                        match chars.peek() {
+                            Some(char) => {
+                                match char {
+                                    '=' => {
+                                        chars.next();
+                                        token_type = TokenType::EqualEqual;
+                                        lexeme = String::from("==");
+                                    }
+                                    _ => {
+
+                                    }
+                                }
+                            }
+                            None => {}
+                        }
+                        let token = Token {token_type, lexeme};
+                        tokens.push(token);
+                    }
+                    '!' => {
+                        chars.next();
+                        let mut token_type = TokenType::Bang;
+                        let mut lexeme = String::from("!");
+                        match chars.peek() {
+                            Some(char) => {
+                                match char {
+                                    '=' => {
+                                        chars.next();
+                                        token_type = TokenType::BangEqual;
+                                        lexeme = String::from("!=");
+                                    }
+                                    _ => {
+
+                                    }
+                                }
+                            }
+                            None => {}
+                        }
+                        let token = Token {token_type, lexeme};
+                        tokens.push(token);
+                    }
                     '\t'|' ' => {
                         chars.next();
                     }
