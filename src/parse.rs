@@ -1,15 +1,15 @@
-use std::{collections::binary_heap::PeekMut, iter::Peekable, slice::Iter};
+use std::{iter::Peekable, slice::Iter};
 
 use crate::{ast::{Binary, BinaryOp, Expr, Grouping, Literal, LiteralType, Unary, UnaryOp}, token::{Token, TokenType}};
 
 
 pub enum ParseResult<'t> {
     AST(Expr<'t>),
-    Error
+    Error(ParseError)
 }
 
 pub struct ParseError {
-    message: String,
+    pub message: String,
 }
 
 // program => expression ;
@@ -18,17 +18,17 @@ pub fn parse(tokens: &Vec<Token>) -> ParseResult {
     match expression(&mut tokens) {
         Ok(expr) => {
             match tokens.peek() {
-                Some(_) => {
+                Some(token) => {
                     // finished parsing, but there's still some tokens left
-                    ParseResult::Error
+                    ParseResult::Error(ParseError {message: format!("Finished parsing, but some tokens remain: {:?}", token)})
                 }
                 None => {
                     ParseResult::AST(expr)
                 }
             }
         }
-        Err(_) => {
-            ParseResult::Error
+        Err(err) => {
+            ParseResult::Error(err)
         }
     }
 }

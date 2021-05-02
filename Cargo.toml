@@ -4,6 +4,14 @@ version = "0.1.0"
 authors = ["curtisxk38 <ck2ha@virginia.edu>"]
 edition = "2018"
 
+[lib]
+name = "rcheer_lib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "rcheer_bin"
+path = "src/main.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
