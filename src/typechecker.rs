@@ -1,4 +1,4 @@
-use crate::{ast::{Binary, BinaryOp, Expr, Grouping, Literal, LiteralType, Unary, UnaryOp}, typed_ast::{TBinary, TExpr, TGrouping, TLiteral, TUnary, TypedExpr}};
+use crate::{ast::{Binary, BinaryOp, Expr, Grouping, Literal, LiteralType, Unary, UnaryOp}};
 
 pub struct TypeError {
     pub message: String,
@@ -13,7 +13,7 @@ struct TypeChecker {
     errors: Vec<TypeError>
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum TypeKind {
     Int,
     Bool,
@@ -21,73 +21,92 @@ pub enum TypeKind {
 }
 
 impl TypeChecker {
-    pub fn typecheck(&mut self, expr: &Expr) -> TypeResult {
+    pub fn typecheck(&mut self, expr: &mut Expr) -> TypeResult {
         self.type_expr(expr);
         TypeResult::Success
     }
-    fn type_expr<'t>(&mut self, expr: &'t Expr) -> TypedExpr<'t> {
+    fn type_expr<'t>(&mut self, expr: &'t mut Expr) -> TypeKind {
         match expr {
             Expr::Binary(binary) => {
-                let tbinary = self.type_binary(binary);
-                TypedExpr {type_kind: tbinary.type_kind, expr: TExpr::Binary(tbinary)}
+                self.type_binary(binary)
             }
             Expr::Unary(unary) => {
-                let tunary = self.type_unary(unary);
-                TypedExpr {type_kind: tunary.type_kind, expr: TExpr::Unary(tunary)}
+                self.type_unary(unary)
             }
             Expr::Literal(literal) => {
-                let tliteral = self.type_literal(literal);
-                TypedExpr {type_kind: tliteral.type_kind, expr: TExpr::Literal(tliteral)}
+                self.type_literal(literal)
             }
             Expr::Grouping(grouping) => {
-                let tgrouping = self.type_grouping(grouping);
-                TypedExpr {type_kind: tgrouping.type_kind, expr: TExpr::Grouping(tgrouping)}
+                self.type_grouping(grouping)
             }
         }
     }
 
-    fn type_binary<'t>(&mut self, binary: &'t Binary) -> TBinary<'t> {
-        let left = self.type_expr(binary.left.as_ref());
-        let right = self.type_expr(binary.right.as_ref());
+    fn type_binary<'t>(&mut self, binary: &'t mut Binary) -> TypeKind {
+        let left_kind = self.type_expr(binary.left.as_mut());
+        let right_kind = self.type_expr(binary.right.as_mut());
 
-        let type_kind = match (&binary.operation, left.type_kind, right.type_kind) {
+        let type_kind = match (&binary.operation, left_kind, right_kind) {
             (BinaryOp::Add, TypeKind::Int, TypeKind::Int) 
             | (BinaryOp::Minus, TypeKind::Int, TypeKind::Int) 
             | (BinaryOp::Times, TypeKind::Int, TypeKind::Int) => {
                 TypeKind::Int
             }
             _ => {
+                match (left_kind, right_kind) {
+                    (TypeKind::Error, _) => {},
+                    (_, TypeKind::Error) => {},
+                    _ => {
+                        // report error if this is new error and not propogated from child type
+                        self.errors.push(TypeError {message: 
+                            format!("Type error for {:?}: illegal operation {:?} on {:?} and {:?}",
+                            binary.token, binary.operation, left_kind, right_kind
+                        )});
+                    }
+                }
                 TypeKind::Error
             }
         };
+        binary.type_kind = Some(type_kind);
+        type_kind
 
-        TBinary {type_kind, binary}
     }
 
-    fn type_unary<'t>(&mut self, unary: &'t Unary) -> TUnary<'t> {
-        let right = self.type_expr(unary.right.as_ref());
-
-        let type_kind = match (&unary.operation, right.type_kind) {
+    fn type_unary<'t>(&mut self, unary: &'t mut Unary) -> TypeKind {
+        let right_kind = self.type_expr(unary.right.as_mut());
+        let type_kind = match (&unary.operation, right_kind) {
             (UnaryOp::Minus, TypeKind::Int) => {
                 TypeKind::Int
             }
             _ => {
+                match right_kind {
+                    TypeKind::Error => {},
+                    _ => {
+                        // report error if this is new error and not propogated from child type
+                        self.errors.push(TypeError {message: 
+                            format!("Type error for {:?}: illegal operation {:?} on {:?}",
+                            unary.token, unary.operation, right_kind 
+                        )});
+                    }
+                }
                 TypeKind::Error
             }
         };
-
-        TUnary {type_kind, unary}
+        unary.type_kind = Some(type_kind);
+        type_kind
     }
 
-    fn type_literal<'t>(&mut self, literal: &'t Literal) -> TLiteral<'t> {
+    fn type_literal<'t>(&mut self, literal: &'t mut Literal) -> TypeKind {
         let type_kind = match literal.literal_type {
             LiteralType::Int => TypeKind::Int,
         };
-        TLiteral {type_kind, literal}
+        literal.type_kind = Some(type_kind);
+        type_kind
     }
 
-    fn type_grouping<'t>(&mut self, grouping: &'t Grouping) -> TGrouping<'t> {
-        let expr = self.type_expr(grouping.expr.as_ref());
-        TGrouping {grouping, type_kind: expr.type_kind}
+    fn type_grouping<'t>(&mut self, grouping: &'t mut Grouping) -> TypeKind {
+        let type_kind = self.type_expr(grouping.expr.as_mut());
+        grouping.type_kind = Some(type_kind);
+        type_kind
     }
 }

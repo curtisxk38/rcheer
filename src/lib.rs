@@ -5,7 +5,6 @@ mod parse;
 mod ast;
 mod codegen;
 mod typechecker;
-mod typed_ast;
 
 pub enum CompileResult {
     Program(String),

@@ -62,7 +62,7 @@ fn expression<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, Pa
             }
         };
         let right = factor(tokens)?;
-        expr = Expr::Binary(Binary {token: op_token, operation, left: Box::new(expr), right: Box::new(right)})
+        expr = Expr::Binary(Binary {token: op_token, operation, left: Box::new(expr), right: Box::new(right), type_kind: None})
     }
     Ok(expr)
 }
@@ -91,7 +91,7 @@ fn factor<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseE
             }
         };
         let right = unary(tokens)?;
-        expr = Expr::Binary(Binary {token: op_token, operation, left: Box::new(expr), right: Box::new(right)})
+        expr = Expr::Binary(Binary {token: op_token, operation, left: Box::new(expr), right: Box::new(right), type_kind: None})
     }
     Ok(expr)
 }
@@ -108,7 +108,7 @@ fn unary<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseEr
                     operation = UnaryOp::Minus;
                     tokens.next();
                     let right = unary(tokens)?;
-                    Ok(Expr::Unary(Unary {token: op_token, operation, right: Box::new(right)}))
+                    Ok(Expr::Unary(Unary {token: op_token, operation, right: Box::new(right), type_kind: None}))
                 }
                 _ => {
                     primary(tokens)
@@ -129,12 +129,12 @@ fn primary<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, Parse
                 TokenType::IntLiteral => {
                     let token = *token;
                     tokens.next();
-                    Ok(Expr::Literal(Literal { token, literal_type: LiteralType::Int}))
+                    Ok(Expr::Literal(Literal { token, literal_type: LiteralType::Int, type_kind: None}))
                 }
                 TokenType::LeftParen => {
                     tokens.next();
                     let expr = expression(tokens)?;
-                    let node = Expr::Grouping(Grouping {expr: Box::new(expr)});
+                    let node = Expr::Grouping(Grouping {expr: Box::new(expr), type_kind: None});
                     match tokens.peek() {
                         Some(token) => {
                             match token.token_type {

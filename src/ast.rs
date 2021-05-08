@@ -1,6 +1,7 @@
-use crate::token::Token;
+use crate::{token::Token, typechecker::TypeKind};
 
 
+#[derive(Debug)]
 pub enum Expr<'t> {
     Binary(Binary<'t>),
     Unary(Unary<'t>),
@@ -8,40 +9,51 @@ pub enum Expr<'t> {
     Grouping(Grouping<'t>),
 }
 
+#[derive(Debug)]
 pub enum BinaryOp {
     Add,
     Minus,
     Times
 }
 
+#[derive(Debug)]
 pub enum UnaryOp {
     Minus
 }
 
+#[derive(Debug)]
 pub enum LiteralType {
     Int
 }
 
+#[derive(Debug)]
 pub struct Binary<'t> {
     pub token: &'t Token,
     pub operation: BinaryOp,
     pub left: Box<Expr<'t>>,
     pub right: Box<Expr<'t>>,
+    pub type_kind: Option<TypeKind>,
 }
 
+#[derive(Debug)]
 pub struct Unary<'t> {
     pub token: &'t Token,
     pub operation: UnaryOp,
-    pub right: Box<Expr<'t>>
+    pub right: Box<Expr<'t>>,
+    pub type_kind: Option<TypeKind>,
 }
 
+#[derive(Debug)]
 pub struct Literal<'t> {
     pub token: &'t Token,
     pub literal_type: LiteralType,
+    pub type_kind: Option<TypeKind>,
 }
 
+#[derive(Debug)]
 pub struct Grouping<'t> {
-    pub expr: Box<Expr<'t>>
+    pub expr: Box<Expr<'t>>,
+    pub type_kind: Option<TypeKind>,
 }
 
 // print string representation of AST for debugging
