@@ -6,11 +6,11 @@ pub struct TypeError {
 
 pub enum TypeResult {
     Success,
-    Error(Vec<TypeChecker>)
+    Error
 }
 
-struct TypeChecker {
-    errors: Vec<TypeError>
+pub struct TypeChecker {
+    pub errors: Vec<TypeError>
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -21,10 +21,19 @@ pub enum TypeKind {
 }
 
 impl TypeChecker {
+    pub fn new() -> TypeChecker {
+        TypeChecker { errors: Vec::new() }
+    }
+
     pub fn typecheck(&mut self, expr: &mut Expr) -> TypeResult {
         self.type_expr(expr);
-        TypeResult::Success
+        if self.errors.len() > 0 {
+            TypeResult::Error
+        } else {
+            TypeResult::Success
+        }
     }
+
     fn type_expr<'t>(&mut self, expr: &'t mut Expr) -> TypeKind {
         match expr {
             Expr::Binary(binary) => {

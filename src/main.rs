@@ -18,12 +18,18 @@ fn main() {
                     .expect(format!("Unable to create output file: {}", output).as_str());
                 file.write_all(asm.as_bytes())
                     .expect("Failed to write to output file: {:?}")
-            }
+            }   
             CompileResult::ParseError(p) => {
                 println!("Error in parsing: {}", p.message)
             }
             CompileResult::ScanError(s) => {
                 println!("Error in scanning: {}", s)
+            }
+            CompileResult::TypeError(errors) => {
+                println!("Type checking failed:");
+                for error in errors {
+                    println!("{}", error.message);
+                }
             }
         }
     }

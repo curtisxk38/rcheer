@@ -25,6 +25,9 @@ pub fn run_test(input: &'static str) -> i32 {
         CompileResult::ScanError(s) => {
             println!("Error in scanning: {}", s)
         }
+        CompileResult::TypeError(errors) => {
+            println!("Error in type checking");
+        }
     };
     Command::new("gcc").arg(output);
     let status = Command::new("./a.out").status();
