@@ -13,7 +13,13 @@ pub enum Expr<'t> {
 pub enum BinaryOp {
     Add,
     Minus,
-    Times
+    Times,
+    BangEqual,
+    EqualEqual,
+    Greater,
+    GreaterEqual,
+    Less,
+    LessEqual,
 }
 
 #[derive(Debug)]

@@ -33,8 +33,84 @@ pub fn parse(tokens: &Vec<Token>) -> ParseResult {
     }
 }
 
-// expression => factor (("+"|"-") factor)* ;
+// expression -> equality
 fn expression<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
+    equality(tokens)
+}
+
+// equality -> comparison ( ( "!=" | "==" ) comparison )*
+fn equality<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
+    let mut expr = comparison(tokens)?;
+    loop {
+        let op_token;
+        let operation;
+        match tokens.peek() {
+            Some(token) => {
+                match token.token_type {
+                    TokenType::BangEqual => {
+                        op_token = *token;
+                        operation = BinaryOp::BangEqual;
+                    }
+                    TokenType::EqualEqual => {
+                        op_token = *token;
+                        operation = BinaryOp::EqualEqual;
+                    }
+                    _ => {
+                        break;
+                    }
+                }
+            }
+            None => {
+                break;
+            }
+        };
+        let right = comparison(tokens)?;
+        expr = Expr::Binary(Binary {token: op_token, operation, left: Box::new(expr), right: Box::new(right), type_kind: None})
+    }
+    Ok(expr)
+}
+// comparison -> term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+fn comparison<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
+    let mut expr = term(tokens)?;
+    loop {
+        let op_token;
+        let operation;
+        match tokens.peek() {
+            Some(token) => {
+                match token.token_type {
+                    TokenType::Greater => {
+                        op_token = *token;
+                        operation = BinaryOp::Greater;
+                    }
+                    TokenType::GreaterEqual => {
+                        op_token = *token;
+                        operation = BinaryOp::GreaterEqual;
+                    }
+                    TokenType::Less => {
+                        op_token = *token;
+                        operation = BinaryOp::Less;
+                    }
+                    TokenType::LessEqual => {
+                        op_token = *token;
+                        operation = BinaryOp::LessEqual;
+                    }
+                    _ => {
+                        break;
+                    }
+                }
+            }
+            None => {
+                break;
+            }
+        };
+        let right = term(tokens)?;
+        expr = Expr::Binary(Binary {token: op_token, operation, left: Box::new(expr), right: Box::new(right), type_kind: None})
+    }
+    Ok(expr)
+}
+
+// term => factor (("+"|"-") factor)* ;
+fn term<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
     let mut expr = factor(tokens)?;
     loop {
         let op_token;
