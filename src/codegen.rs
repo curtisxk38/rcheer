@@ -57,6 +57,7 @@ fn visit_binary(node: &Binary, program: &mut String) {
         BinaryOp::Add => "addq",
         BinaryOp::Minus => "subq",
         BinaryOp::Times => "imulq",
+        _ => todo!()
     };
     program.push_str(
         format!("

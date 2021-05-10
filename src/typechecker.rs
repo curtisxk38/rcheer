@@ -1,3 +1,5 @@
+use std::mem;
+
 use crate::{ast::{Binary, BinaryOp, Expr, Grouping, Literal, LiteralType, Unary, UnaryOp}};
 
 pub struct TypeError {
@@ -60,6 +62,34 @@ impl TypeChecker {
             | (BinaryOp::Minus, TypeKind::Int, TypeKind::Int) 
             | (BinaryOp::Times, TypeKind::Int, TypeKind::Int) => {
                 TypeKind::Int
+            }
+            (BinaryOp::Greater, TypeKind::Int, TypeKind::Int) 
+            | (BinaryOp::GreaterEqual, TypeKind::Int, TypeKind::Int) 
+            | (BinaryOp::Less, TypeKind::Int, TypeKind::Int) 
+            | (BinaryOp::LessEqual, TypeKind::Int, TypeKind::Int) => {
+                TypeKind::Bool
+            }
+            (BinaryOp::BangEqual, _, _) 
+            | (BinaryOp::EqualEqual, _, _) => {
+                match (left_kind, right_kind) {
+                    (TypeKind::Error, _) => {
+                        TypeKind::Error
+                    }
+                    (_, TypeKind::Error) => {
+                        TypeKind::Error
+                    }
+                    _ => {
+                        if mem::discriminant(&left_kind) == mem::discriminant(&right_kind) {
+                            TypeKind::Bool
+                        } else {
+                            self.errors.push(TypeError {message: 
+                                format!("Type error for {:?}: Expected LHS ({:?}) to match RHS ({:?}) for {:?}",
+                                binary.token, left_kind, right_kind, binary.operation
+                            )});
+                            TypeKind::Error
+                        }
+                    }
+                }    
             }
             _ => {
                 match (left_kind, right_kind) {

@@ -72,6 +72,12 @@ pub fn tree_repr(root: &Expr, indent: usize) -> String {
                 BinaryOp::Add => "+",
                 BinaryOp::Minus => "-",
                 BinaryOp::Times => "*",
+                BinaryOp::BangEqual => "!=",
+                BinaryOp::EqualEqual => "==",
+                BinaryOp::Greater => ">",
+                BinaryOp::GreaterEqual => ">=",
+                BinaryOp::Less => "<",
+                BinaryOp::LessEqual => "<=",
             };
             repr = format!("{:>width$}\n{left}\n{right}",
                 op=op,
