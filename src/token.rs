@@ -3,6 +3,8 @@
 pub struct Token {
     pub lexeme: String,
     pub token_type: TokenType,
+    pub line: i32,
+    pub column: i32,
 }
 
 #[derive(Debug)]

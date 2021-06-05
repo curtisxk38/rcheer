@@ -16,7 +16,8 @@ pub enum CompileResult {
 }
 
 pub fn compile(program: &str) -> CompileResult {
-    match scan::scan(&program) {
+    let mut scanner = scan::Scanner::new();
+    match scanner.scan(&program) {
         scan::ScanResult::Tokens(tokens) => {
             match parse::parse(&tokens) {
                 parse::ParseResult::AST(mut ast) => {
