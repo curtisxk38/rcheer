@@ -24,7 +24,8 @@ pub fn compile(program: &str) -> CompileResult {
                     let mut typechecker = typechecker::TypeChecker::new();
                     match typechecker.typecheck(&mut ast) {
                         typechecker::TypeResult::Success => {
-                            let asm = codegen::gen_code(ast);
+                            let mut code_generator = codegen::CodeGenerator::new();
+                            let asm = code_generator.gen_code(ast);
                             CompileResult::Program(asm)
                         }
                         typechecker::TypeResult::Error => {
