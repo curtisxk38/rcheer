@@ -1,5 +1,7 @@
+use std::fmt::format;
 use std::process::Command;
-use std::{fs::File, io::Write};
+use std::{fs::File, fs::remove_file, io::Write};
+
 
 
 use rcheer_lib::CompileResult;
@@ -18,11 +20,11 @@ pub enum TestResult {
 
 pub fn run_test(input: &'static str) -> TestResult {
 
-    let output = "test.s";
+    let output = format!("test.s");
     match rcheer_lib::compile(input) {
         CompileResult::Program(asm) => {
-            let mut file = File::create(output)
-                .expect(format!("Unable to create output file: {}", output).as_str());
+            let mut file = File::create(output.as_str())
+                .expect(format!("Unable to create output file: {}", output.as_str()).as_str());
             file.write_all(asm.as_bytes())
                 .expect("Failed to write to output file: {:?}")
         }   
@@ -39,12 +41,24 @@ pub fn run_test(input: &'static str) -> TestResult {
             return TestResult::TypeError;
         }
     };
-    Command::new("gcc").arg(output);
+    let gcc_status = Command::new("gcc")
+        .arg(output)
+        .status();
+    match gcc_status {
+        Ok(s) => {
+            println!("GCC status: {}", s);
+        },
+        Err(e) => {
+            panic!("GCC failed to compile: {}", e)
+        }
+    }
     let status = Command::new("./a.out").status();
     match status {
-        Ok(s) => {TestResult::Execution(s.code().unwrap())}
-        Err(_) => {
-            panic!("no status")
+        Ok(s) => {
+            println!("status {}", s.code().unwrap());
+            TestResult::Execution(s.code().unwrap())}
+        Err(e) => {
+            panic!("running executable error: {}", e)
         }
     }
 }

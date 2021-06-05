@@ -14,6 +14,13 @@ gcc output.o
 The `compile.sh` script will do all of the above, so you can run
 `./compile.sh filename.ch` to compile a program and execute it
 
+# Tests
+The integration tests pass a Cheer program to the compiler which outputs assembly. Then GCC is used to compile the assembly into an executable, and then the executable is run.
+
+By default, cargo runs tests in parallel. This causes the integration tests to mess up
+
+`RUST_TEST_THREADS=1 cargo test`
+
 ## Notes
 C to asm:
 ```

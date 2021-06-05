@@ -26,3 +26,22 @@ fn type_error2() {
         _ => false,
     });
 }
+
+#[test]
+fn test_less_than() {
+    let input = "5 < 6";
+    assert!(match common::run_test(input) {
+        common::TestResult::Execution(status_code) => status_code == 1,
+        _ => false,
+    });
+}
+
+
+#[test]
+fn test_equal_fail() {
+    let input = "5 == 7";
+    assert!(match common::run_test(input) {
+        common::TestResult::Execution(status_code) => status_code == 0,
+        _ => false,
+    });
+}
