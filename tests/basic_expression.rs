@@ -9,3 +9,20 @@ fn test_basic_expression() {
     });
 }
 
+#[test]
+fn type_error() {
+    let input = "5 < (5 < 5)";
+    assert!(match common::run_test(input) {
+        common::TestResult::TypeError => true,
+        _ => false,
+    });
+}
+
+#[test]
+fn type_error2() {
+    let input = "5 == (5 < 5)";
+    assert!(match common::run_test(input) {
+        common::TestResult::TypeError => true,
+        _ => false,
+    });
+}
