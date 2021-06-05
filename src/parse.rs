@@ -50,10 +50,12 @@ fn equality<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, Pars
                     TokenType::BangEqual => {
                         op_token = *token;
                         operation = BinaryOp::BangEqual;
+                        tokens.next();
                     }
                     TokenType::EqualEqual => {
                         op_token = *token;
                         operation = BinaryOp::EqualEqual;
+                        tokens.next();
                     }
                     _ => {
                         break;
@@ -81,18 +83,22 @@ fn comparison<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, Pa
                     TokenType::Greater => {
                         op_token = *token;
                         operation = BinaryOp::Greater;
+                        tokens.next();
                     }
                     TokenType::GreaterEqual => {
                         op_token = *token;
                         operation = BinaryOp::GreaterEqual;
+                        tokens.next();
                     }
                     TokenType::Less => {
                         op_token = *token;
                         operation = BinaryOp::Less;
+                        tokens.next();
                     }
                     TokenType::LessEqual => {
                         op_token = *token;
                         operation = BinaryOp::LessEqual;
+                        tokens.next();
                     }
                     _ => {
                         break;
