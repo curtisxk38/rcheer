@@ -86,6 +86,8 @@ impl CodeGenerator {
     }
 
     fn binary_compare(&mut self, jump_instr: &str, program: &mut String) {
+        let label = self.bb_label_counter;
+        self.bb_label_counter += 1;
         program.push_str(
             format!("\
             \t\tpopq %rdx\n\
@@ -98,9 +100,8 @@ impl CodeGenerator {
             \tCMP_TRUE{label}:\n\
             \t\tpushq $1\n\
             \tCMP_DONE{label}:\n\
-            ", jump_instr=jump_instr, label=self.bb_label_counter).as_str()
+            ", jump_instr=jump_instr, label=label).as_str()
         );
-        self.bb_label_counter += 1;
     }
 
     fn visit_unary(&mut self, node: &Unary, program: &mut String) {
@@ -126,6 +127,41 @@ impl CodeGenerator {
     }
 
     fn visit_if_expr(&mut self, node: &If, program: &mut String) {
-        todo!()
+        self.visit_expr(node.condition.as_ref(), program);
+        
+        let label = self.bb_label_counter;
+        self.bb_label_counter += 1;
+        
+        // order of operands in cmpq matters below
+        program.push_str(
+            format!("\
+            \t\tpopq %rax\n\
+            \t\tcmpq $1, %rax\n\
+            \t\tje THEN{label}\n\
+            \tELSE{label}:\n\
+            ", label=label).as_str()
+        );
+
+        if let Some(else_branch) = &node.else_branch {
+            self.visit_expr(else_branch.as_ref(), program)
+            // TODO possible optimization
+            // If there is no else branch, we can chane je to jne
+            // and fall through to THEN block, and jump over THEN block to IF_DONE
+        }
+
+        program.push_str(
+            format!("\
+            \t\tjmp IF_ELSE_DONE{label}\n\
+            \tTHEN{label}:\n\
+            ", label=label).as_str()
+        );
+
+        self.visit_expr(node.then_branch.as_ref(), program);
+
+        program.push_str(
+            format!("\
+            \tIF_ELSE_DONE{label}:\n\
+            ", label=label).as_str()
+        );
     }
 }
