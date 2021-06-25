@@ -65,6 +65,7 @@ pub struct Grouping<'t> {
 
 #[derive(Debug)]
 pub struct If<'t> {
+    pub token: &'t Token,
     pub condition: Box<Expr<'t>>,
     pub then_branch: Box<Expr<'t>>,
     pub else_branch: Option<Box<Expr<'t>>>,

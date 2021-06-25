@@ -1,6 +1,6 @@
-use std::{iter::Peekable, slice::Iter};
+use std::{fmt::format, iter::Peekable, slice::Iter};
 
-use crate::{ast::{Binary, BinaryOp, Expr, Grouping, Literal, LiteralType, Unary, UnaryOp}, token::{Token, TokenType}};
+use crate::{ast::{Binary, BinaryOp, Expr, Grouping, If, Literal, LiteralType, Unary, UnaryOp}, token::{Token, TokenType}};
 
 
 pub enum ParseResult<'t> {
@@ -50,8 +50,94 @@ fn expression<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, Pa
     }
 }
 
+// if_expr -> "if" expression "{" expression "}" ("else {" expression "}")?
 fn if_expr<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
-    todo!()
+    let token = tokens.next().unwrap(); // consume "if"
+    let condition = Box::new(expression(tokens)?);
+    
+    match tokens.peek() {
+        Some(token) => {
+            match token.token_type {
+                TokenType::LeftBrace => {
+                    tokens.next();
+                }
+                _ => {
+                    return Err(ParseError{message: format!("Expect {{ got: {:?}", token)});
+                }
+            }
+        }
+        None => {
+            return Err(ParseError{message: format!("Expect {{ reached EOF")});
+        }
+    };
+
+    let then_branch = Box::new(expression(tokens)?);
+
+    match tokens.peek() {
+        Some(token) => {
+            match token.token_type {
+                TokenType::RightBrace => {
+                    tokens.next();
+                }
+                _ => {
+                    return Err(ParseError{message: format!("Expect }} got: {:?}", token)});
+                }
+            }
+        }
+        None => {
+            return Err(ParseError{message: format!("Expect }} reached EOF")});
+        }
+    };
+
+    let else_branch = match tokens.peek() {
+        Some(token) => {
+            match token.token_type {
+                TokenType::Else => {
+                    tokens.next(); // consume "else"
+                    // match {
+                    match tokens.peek() {
+                        Some(token) => {
+                            match token.token_type {
+                                TokenType::LeftBrace => {
+                                    tokens.next();
+                                }
+                                _ => {
+                                    return Err(ParseError{message: format!("Expect {{ got: {:?}", token)});
+                                }
+                            }
+                        }
+                        None => {
+                            return Err(ParseError{message: format!("Expect {{ reached EOF")});
+                        }
+                    };
+                
+                    let else_branch = expression(tokens)?;
+                
+                    // match }
+                    match tokens.peek() {
+                        Some(token) => {
+                            match token.token_type {
+                                TokenType::RightBrace => {
+                                    tokens.next();
+                                }
+                                _ => {
+                                    return Err(ParseError{message: format!("Expect }} got: {:?}", token)});
+                                }
+                            }
+                        }
+                        None => {
+                            return Err(ParseError{message: format!("Expect }} reached EOF")});
+                        }
+                    };
+                    Some(Box::new(else_branch))
+                }
+                _ => None
+            }
+        }
+        None => None
+    };    
+
+    Ok(Expr::If(If{token, condition, then_branch, else_branch, type_kind: None}))
 }
 
 // equality -> comparison ( ( "!=" | "==" ) comparison )*
