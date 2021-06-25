@@ -1,6 +1,6 @@
 use std::mem;
 
-use crate::{ast::{Binary, BinaryOp, Expr, Grouping, Literal, LiteralType, Unary, UnaryOp}};
+use crate::{ast::{Binary, BinaryOp, Expr, Grouping, If, Literal, LiteralType, Unary, UnaryOp}};
 
 pub struct TypeError {
     pub message: String,
@@ -50,6 +50,7 @@ impl TypeChecker {
             Expr::Grouping(grouping) => {
                 self.type_grouping(grouping)
             }
+            Expr::If(if_expr) => self.type_if(if_expr),
         }
     }
 
@@ -147,5 +148,9 @@ impl TypeChecker {
         let type_kind = self.type_expr(grouping.expr.as_mut());
         grouping.type_kind = Some(type_kind);
         type_kind
+    }
+
+    fn type_if<'t>(&mut self, grouping: &'t mut If) -> TypeKind {
+        todo!()
     }
 }

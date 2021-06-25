@@ -57,6 +57,18 @@ impl Scanner {
                                 lexeme: String::from(")"), line: self.line, column: self.column};
                             tokens.push(token);
                         }
+                        '{' => {
+                            self.advance_char(&mut chars);
+                            let token = Token {token_type: TokenType::LeftBrace, 
+                                lexeme: String::from("{"), line: self.line, column: self.column};
+                            tokens.push(token);
+                        }
+                        '}' => {
+                            self.advance_char(&mut chars);
+                            let token = Token {token_type: TokenType::RightBrace,
+                                lexeme: String::from("}"), line: self.line, column: self.column};
+                            tokens.push(token);
+                        }
                         '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' => {
                             let char = char.clone();
                             self.advance_char(&mut chars);

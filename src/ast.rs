@@ -7,6 +7,7 @@ pub enum Expr<'t> {
     Unary(Unary<'t>),
     Literal(Literal<'t>),
     Grouping(Grouping<'t>),
+    If(If<'t>),
 }
 
 #[derive(Debug)]
@@ -62,6 +63,14 @@ pub struct Grouping<'t> {
     pub type_kind: Option<TypeKind>,
 }
 
+#[derive(Debug)]
+pub struct If<'t> {
+    pub condition: Box<Expr<'t>>,
+    pub then_branch: Box<Expr<'t>>,
+    pub else_branch: Option<Box<Expr<'t>>>,
+    pub type_kind: Option<TypeKind>,
+}
+
 // print string representation of AST for debugging
 #[allow(dead_code)]
 pub fn tree_repr(root: &Expr, indent: usize) -> String {
@@ -102,6 +111,7 @@ pub fn tree_repr(root: &Expr, indent: usize) -> String {
         Expr::Grouping(n) => {
             repr = tree_repr(n.expr.as_ref(), indent);
         }
+        Expr::If(_) => todo!(),
     }
     repr
 }

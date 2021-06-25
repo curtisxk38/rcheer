@@ -1,4 +1,4 @@
-use crate::ast::{Binary, BinaryOp, Expr, Literal, Unary, UnaryOp};
+use crate::ast::{Binary, BinaryOp, Expr, If, Literal, Unary, UnaryOp};
 
 pub struct CodeGenerator {
     bb_label_counter: i32
@@ -54,6 +54,7 @@ impl CodeGenerator {
             Expr::Literal(literal) => {self.visit_literal(literal, program)}
             Expr::Unary(unary) => {self.visit_unary(unary, program)}
             Expr::Grouping(grouping) => {self.visit_expr(grouping.expr.as_ref(), program)}
+            Expr::If(if_expr) => {self.visit_if_expr(if_expr, program)},
         }
     }
 
@@ -122,5 +123,9 @@ impl CodeGenerator {
         program.push_str(
             format!("\t\tpushq ${}\n", node.token.lexeme).as_str()
         )
+    }
+
+    fn visit_if_expr(&mut self, node: &If, program: &mut String) {
+        todo!()
     }
 }

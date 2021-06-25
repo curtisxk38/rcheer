@@ -15,6 +15,8 @@ pub enum TokenType {
     Star,
     LeftParen,
     RightParen,
+    LeftBrace,
+    RightBrace,
     Greater,
     GreaterEqual,
     Less,
@@ -23,4 +25,6 @@ pub enum TokenType {
     EqualEqual,
     Bang,
     BangEqual,
+    If,
+    Else,
 }

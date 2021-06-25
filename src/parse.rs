@@ -33,9 +33,25 @@ pub fn parse(tokens: &Vec<Token>) -> ParseResult {
     }
 }
 
-// expression -> equality
+// expression -> equality | if_expr
 fn expression<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
-    equality(tokens)
+    match tokens.peek() {
+        Some(token) => {
+            match token.token_type {
+                TokenType::If => {
+                    if_expr(tokens)
+                }
+                _ => {
+                    equality(tokens)
+                }
+            }
+        }
+        None => {Err(ParseError{message: String::from("Reached EOF while parsing")})}
+    }
+}
+
+fn if_expr<'t>(tokens: &mut Peekable<Iter<'t, Token>>) -> Result<Expr<'t>, ParseError> {
+    todo!()
 }
 
 // equality -> comparison ( ( "!=" | "==" ) comparison )*
