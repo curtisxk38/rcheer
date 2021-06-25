@@ -54,3 +54,12 @@ fn test_if() {
         _ => false,
     });
 }
+
+#[test]
+fn test_if_type_error() {
+    let input = "if 2 > 1 { 1 } else { 0 > 1 }";
+    assert!(match common::run_test(input) {
+        common::TestResult::TypeError => true,
+        _ => false,
+    });
+}

@@ -150,7 +150,33 @@ impl TypeChecker {
         type_kind
     }
 
-    fn type_if<'t>(&mut self, grouping: &'t mut If) -> TypeKind {
-        todo!()
+    fn type_if<'t>(&mut self, if_expr: &'t mut If) -> TypeKind {
+        let then_type = self.type_expr(if_expr.then_branch.as_mut());
+
+        let type_kind = if let Some(else_branch) = &mut if_expr.else_branch {
+            let else_type = self.type_expr(else_branch.as_mut());
+            let type_kind = if std::mem::discriminant(&then_type) == std::mem::discriminant(&else_type) {
+                then_type
+            } else {
+                match (then_type, else_type) {
+                    (TypeKind::Error, _) | (_, TypeKind::Error) => {}
+                    _ => {
+                        // report error if this is new error and not propogated from child type
+                        self.errors.push(TypeError {message: 
+                            format!("Type error for {:?}: then branch returns {:?} and else branch returns {:?}",
+                            if_expr.token, then_type, else_type
+                        )});
+                    }
+                }
+                TypeKind::Error
+                
+            };
+            type_kind
+        } else {
+            then_type
+        };
+
+        if_expr.type_kind = Some(type_kind);
+        type_kind
     }
 }
