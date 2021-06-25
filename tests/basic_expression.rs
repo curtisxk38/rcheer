@@ -45,3 +45,12 @@ fn test_equal_fail() {
         _ => false,
     });
 }
+
+#[test]
+fn test_if() {
+    let input = "if 2 > 1 { 1} else { 0 }";
+    assert!(match common::run_test(input) {
+        common::TestResult::Execution(status_code) => status_code == 1,
+        _ => false,
+    });
+}

@@ -23,7 +23,7 @@ fn main() {
                 println!("Error in parsing: {}", p.message)
             }
             CompileResult::ScanError(s) => {
-                println!("Error in scanning: {}", s)
+                println!("Error in scanning: {:?}", s)
             }
             CompileResult::TypeError(errors) => {
                 println!("Type checking failed:");

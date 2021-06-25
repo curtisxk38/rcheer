@@ -4,7 +4,14 @@ use crate::token::{Token, TokenType};
 
 pub enum ScanResult {
     Tokens(Vec<Token>),
-    Error(String),
+    Error(ScanError),
+}
+
+#[derive(Debug)]
+pub struct ScanError {
+    pub message: String,
+    pub line: i32,
+    pub column: i32,
 }
 
 pub struct Scanner {
@@ -74,6 +81,26 @@ impl Scanner {
                             self.advance_char(&mut chars);
                             let token = self.match_number(&mut chars, char);
                             tokens.push(token)
+                        }
+                        '0' => {
+                            self.advance_char(&mut chars);
+                            let token = Token { token_type: TokenType::IntLiteral, lexeme: String::from("0"),
+                                line: self.line, column: self.column };
+                            tokens.push(token);
+
+                            if let Some(char) = chars.peek() {
+                                match char {
+                                    '1'|'2'|'3'|'4'|'5'|'6'|'7'|'8'|'9' => {
+                                        return ScanResult::Error(ScanError {
+                                            message: String::from("Leading zeros in integer literals are not permitted"),
+                                            line: self.line,
+                                            column: self.column,
+                                        });
+                                    }
+                                    _ => {}
+                                }
+                            }
+                            
                         }
                         '>' => {
                             self.advance_char(&mut chars);
@@ -172,7 +199,16 @@ impl Scanner {
                             self.column = 0;
                         }
                         _ => {
-                            return ScanResult::Error(format!("Unrecognized input {}", char));
+                            if char.is_alphabetic() {
+                                let token = self.match_alphabetic(&mut chars);
+                                tokens.push(token);
+                            } else {
+                                return ScanResult::Error(ScanError {
+                                    message: format!("Unrecognized input {}", char),
+                                    line: self.line,
+                                    column: self.column,
+                                });
+                            }
                         }
                     };
                 }
@@ -206,6 +242,29 @@ impl Scanner {
             }
         };
         Token {token_type: TokenType::IntLiteral, lexeme, line: self.line, column: self.column}
+    }
+
+    fn match_alphabetic(&mut self, chars: &mut Peekable<Chars>) -> Token {
+        let mut lexeme = String::from("");
+        loop {
+            if let Some(possible_alphabetic) = chars.peek() {
+                if possible_alphabetic.is_alphanumeric() {
+                    lexeme.push(*possible_alphabetic);
+                    self.advance_char(chars);
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        };
+
+        let token_type = match &lexeme[..] {
+            "else" => TokenType::Else,
+            "if" => TokenType::If,
+            _ => TokenType::Identifier,
+        };
+        Token {token_type, lexeme, line: self.line, column: self.column}
     }
 
     fn advance_char(&mut self, chars: &mut Peekable<Chars>) {

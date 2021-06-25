@@ -33,7 +33,7 @@ pub fn run_test(input: &'static str) -> TestResult {
             return TestResult::ParseError;
         }
         CompileResult::ScanError(s) => {
-            println!("Error in scanning: {}", s);
+            println!("Error in scanning: {:?}", s);
             return TestResult::ScanError;
         }
         CompileResult::TypeError(errors) => {

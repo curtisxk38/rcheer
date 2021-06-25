@@ -27,4 +27,5 @@ pub enum TokenType {
     BangEqual,
     If,
     Else,
+    Identifier,
 }

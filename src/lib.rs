@@ -12,7 +12,7 @@ pub enum CompileResult {
     Program(String),
     ParseError(parse::ParseError),
     TypeError(Vec<TypeError>),
-    ScanError(String)
+    ScanError(scan::ScanError)
 }
 
 pub fn compile(program: &str) -> CompileResult {
